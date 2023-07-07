@@ -1,0 +1,25 @@
+name: CI
+
+on:
+  push:
+    branches: [ main ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: Setup Cog
+      uses: replicate/setup-cog@v1.0.2
+      with:
+        token: ${{ secrets.REPLICATE_API_TOKEN }}
+
+    - name: Download weights
+      run: |
+        chmod +x scripts/download_and_prepare_model.py
+        cog run python scripts/download_and_prepare_model.py --model_name mosaicml/mpt-7b-storywriter --model_path model --tensorize --tensorizer_path model/mpt-7b-storywriter-65.tensors
+
+    - name: Push to Replicate
+      run: cog push r8.im/fire/tool-remove-background
